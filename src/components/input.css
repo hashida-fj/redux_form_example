@@ -1,0 +1,11 @@
+input.widen {
+    width: 0%;
+    transition-property: width;
+    transition-duration: 0.3s;
+    transition-delay: 0s;
+    transition-timing-function:ease-in-out;
+}
+
+input.widen:focus {
+    width: 100%;
+}
