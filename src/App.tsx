@@ -1,24 +1,132 @@
 import * as React from 'react';
 import './App.css';
-import Input from './components/input';
-
-import {Row, Col} from 'reactstrap';
-
-import MyForm from './my_form';
-
 import logo from './logo.svg';
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-interface IUser {
-  last_name: string
-  first_name: string
-  email: string
-}
-async function showResults(values: IUser) {
-  await sleep(500);
-  window.alert(`You submitted:\n\n${JSON.stringify(values, null, 2)}`);
+import CreatableSelect from 'react-select/lib/Creatable';
+import {components} from 'react-select';
+// import { colourOptions, groupedOptions } from '../data';
+
+
+const loading = true
+
+const Group = (props: any) => {
+  console.log(props)
+
+  if (loading && props.data.label === "tag"){
+    return <img src={logo} className="App-logo" alt="logo" />
+  } else {
+    return(
+      <components.Group {...props}/>
+    )
+  }
 };
+
+const MenuList = (props: any) => {
+  return (
+    <components.MenuList {...props}>
+      <div style={{border: "5px solid green"}}>
+        {props.children}
+      </div>
+    </components.MenuList>
+  );
+};
+
+
+const tagsOptions = [
+    {label: "one", value: "one", color: "blue"},
+    {label: "two", value: "two", color: "red"},
+    {label: "three", value: "three", color: "yellow"},
+    {label: "four", value: "four", color: "green"},
+];
+
+interface MyState {
+  inputValue: string,
+  values: {label: string, value: string}[]
+}
+
+const colourStyles = {
+  multiValue: (styles: any, { data }: any) => {
+    const color = data.color;
+    return {
+      ...styles,
+      backgroundColor: color,
+    };
+  },
+  multiValueLabel: (styles: any, { data }: any) => ({
+    ...styles,
+    color: "white",
+  }),
+  multiValueRemove: (styles: any, { data }: any) => ({
+    ...styles,
+    color: data.color,
+    ':hover': {
+      backgroundColor: data.color,
+      color: 'white',
+    },
+  }),
+};
+
+class Myselect extends React.Component<{}, MyState> {
+  state = {
+    inputValue: '',
+    values: []
+  };
+
+  handleChange = (newValue: any, actionMeta: any) => {
+
+    const action = actionMeta.action
+
+    if(action === "select-option") {
+      if(actionMeta.option.value == "bbbb") {
+        const newitem = {
+          label: `filename:${this.state.inputValue}`,
+          value: `filename::${this.state.inputValue}`,
+          color: "gray",
+        }
+        this.setState({values: [...this.state.values, newitem] })
+        return
+      }
+    } else if (action === "create-option") {
+      const newitem = {
+        label: `${this.state.inputValue}`,
+        value: `${this.state.inputValue}`,
+        color: "black",
+      }
+      this.setState({values: [...this.state.values, newitem] })
+      return
+    }
+    this.setState({values: newValue})
+  };
+
+  handleInputChange = (inputValue: any, actionMeta: any) => {
+    this.setState({inputValue})
+  }
+  render() {
+    const groupedOptions = [
+      {label: "search", options: [{label: `filename ${this.state.inputValue}`, value: "bbbb"}], value: ""},
+      {label: "tag", options: tagsOptions, value: ""},
+    ]
+
+    return (
+      <CreatableSelect
+        isClearable
+        isMulti
+        onChange={this.handleChange}
+        onInputChange={this.handleInputChange}
+        options={groupedOptions}
+
+        inputValue={this.state.inputValue}
+        value={this.state.values}
+
+        styles={colourStyles}
+
+        components={{Group, MenuList}}
+        isValidNewOption={(i: any, v: any, o: any) => false}
+      />
+    );
+  }
+}
 
 class App extends React.Component {
   public render() {
@@ -32,14 +140,8 @@ class App extends React.Component {
           To get started, edit <code>src/App.tsx</code> and save to reload.
           Hello.
         </p>
-        <Input />
 
-        <Row>
-          <Col sm={10}>
-            <h3>フォーム画面</h3>
-            <MyForm onSubmit={showResults}/>
-          </Col>
-        </Row>
+        <Myselect />
       </div>
     );
   }
